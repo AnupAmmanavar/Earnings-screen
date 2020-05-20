@@ -32,6 +32,9 @@ android {
 
 
 dependencies {
+
+    implementation(project(":ui"))
+
     implementation(BuildPlugins.kotlinStdLib)
     implementation(Libs.appCompat)
     implementation(Libs.coreKtx)
