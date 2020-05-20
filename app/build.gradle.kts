@@ -28,6 +28,14 @@ android {
             )
         }
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 
@@ -39,10 +47,20 @@ dependencies {
     implementation(Libs.appCompat)
     implementation(Libs.coreKtx)
     implementation(Libs.constraintLayout)
-    implementation(Libs.epoxy)
-    annotationProcessor(Libs.epoxyProcessor)
 
     testImplementation(TestLibs.junit)
+
+    implementation(Libs.viewModelKtx)
+    implementation(Libs.lifecycleKtx)
+    implementation(Libs.activityKtx)
+
+    implementation(Libs.coroutinesCore)
+    implementation(Libs.coroutinesAndroid)
+
+    implementation(Libs.epoxy)
+    kapt(Libs.epoxyProcessor)
+
+
 
     androidTestImplementation(InstrumentationTestLibs.junit)
     androidTestImplementation(InstrumentationTestLibs.espressoCore)

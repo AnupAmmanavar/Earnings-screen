@@ -18,14 +18,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
+
+    dataBinding {
+        isEnabled = true
+    }
 }
 
 
 dependencies {
-    implementation(BuildPlugins.kotlinStdLib)
+    implementation(Libs.appCompat)
     implementation(Libs.coreKtx)
+    implementation(Libs.constraintLayout)
+    implementation(BuildPlugins.kotlinStdLib)
     testImplementation(TestLibs.junit)
 
     implementation(Libs.epoxy)
-    annotationProcessor(Libs.epoxyProcessor)
+    implementation(Libs.epoxyDataBinding)
+    kapt(Libs.epoxyProcessor)
 }

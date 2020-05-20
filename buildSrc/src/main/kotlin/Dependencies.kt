@@ -21,33 +21,33 @@ object BuildPlugins {
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 }
 
-object Version {
-    const val room = "2.2.5"
-}
-
 object Libs {
     private object Versions {
         const val coreKtx = "1.2.0"
-        const val room = Version.room
         const val appCompat = "1.1.0"
         const val constraintLayout = "1.1.3"
         const val epoxy = "3.10.0"
+        const val coroutinesVersion = "1.3.7"
+        const val lifeCycleVersion = "2.2.0"
 
     }
 
     const val coreKtx = "androidx.core:core-ktx:${Versions.coreKtx}"
 
-    const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
-    const val roomCompiler = "androidx.room:room-compiler:${Versions.room}"
-    const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
-    const val roomRx = "androidx.room:room-rxjava2:${Version.room}"
-
     const val epoxy = "com.airbnb.android:epoxy:${Versions.epoxy}"
+    const val epoxyDataBinding = "com.airbnb.android:epoxy-databinding:${Versions.epoxy}"
     const val epoxyProcessor = "com.airbnb.android:epoxy-processor:${Versions.epoxy}"
+
+    const val lifecycleKtx = "androidx.lifecycle:lifecycle-extensions:${Versions.lifeCycleVersion}"
+    const val viewModelKtx = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifeCycleVersion}"
+    const val activityKtx = "androidx.activity:activity-ktx:1.1.0"
 
     const val appCompat = "androidx.appcompat:appcompat:${Versions.appCompat}"
     const val constraintLayout =
         "androidx.constraintlayout:constraintlayout:${Versions.constraintLayout}"
+
+    const val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutinesVersion}"
+    const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutinesVersion}"
 
 }
 
@@ -59,10 +59,8 @@ object TestLibs {
         const val testRules = "1.2.0"
         const val testCore = "1.2.0"
         const val archCoreTesting = "2.1.0"
-        const val room = Version.room
     }
 
-    const val room = "androidx.room:room-testing:${Versions.room}"
     const val robolectric = "org.robolectric:robolectric:${Versions.robolectric}"
     const val testRules = "androidx.test:rules:${Versions.testRules}"
     const val archCoreTesting = "androidx.arch.core:core-testing:${Versions.archCoreTesting}"
