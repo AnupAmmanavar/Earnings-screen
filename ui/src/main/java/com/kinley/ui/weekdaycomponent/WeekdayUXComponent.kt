@@ -55,7 +55,8 @@ interface WeekdayUIDelegate : UIDelegate {
 data class WeekdayUiModel(
     val day: String, // Sun
     val date: Int, // 21
-    val earning: Double //200.0
+    val earning: Double, //200.0
+    val isSelected: Boolean
 )
 
 

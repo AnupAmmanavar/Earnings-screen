@@ -57,5 +57,6 @@ interface WeekUIDelegate : UIDelegate {
 
 data class WeekUiModel(
     val week: String, // Week 21
-    val earning: Double // 200
+    val earning: Double, // 200
+    val isSelected: Boolean
 )
