@@ -3,7 +3,6 @@
 package com.kinley.earnings
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,7 +12,6 @@ import com.kinley.ui.WeekdayBindingModel_
 import com.kinley.ui.weekcomponent.WeekUiModel
 import com.kinley.ui.weekcomponent.WeekVMDelegate
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -34,7 +32,7 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
             list.map {
                 WeekBindingModel_()
-                    .id(it.week)
+                    .id(it.id)
                     .weekUiModel(it)
                     .onClick { _ ->
                         onWeekSelected(it)
@@ -50,10 +48,10 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
             list.map {
                 WeekdayBindingModel_()
-                    .id(it.day)
+                    .id(it.id)
                     .weekdayUiModel(it)
                     .onClick { v ->
-                        vm.updateDay(it.day)
+                        vm.updateDay(it.id)
                     }
                     .addTo(this)
             }
@@ -64,7 +62,7 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
             list.map {
                 EarningsBindingModel_()
-                    .id("${it.earningType} ${it.amount}") // Add identifier
+                    .id(it.id)
                     .uiModel(it)
                     .addTo(this)
             }
@@ -81,7 +79,7 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
     }
 
     override fun onWeekSelected(week: WeekUiModel) {
-        vm.updateWeek(week)
+        vm.updateWeek(week.id)
     }
 }
 

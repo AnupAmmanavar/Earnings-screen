@@ -110,17 +110,17 @@ class MainViewModel : ViewModel(), LifecycleObserver {
      * More of a readability purpose. Can be moved out to a separate class
      */
     private fun toWeeksUiModels(weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport?): List<WeekUiModel> {
-        return weeks.map { WeekUiModel(it.week, it.earnings, it == selectedWeeklyReport) }
+        return weeks.map { WeekUiModel(it.id, it.week, it.earnings, it == selectedWeeklyReport) }
     }
 
     private fun toWeekdayUiModels(selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport?) : List<WeekdayUiModel> {
         return selectedWeek?.dailyReports?.map {
-            WeekdayUiModel(it.day, it.date, it.earningAmount, it == selectedDailyReport)
+            WeekdayUiModel(it.id, it.day, it.date, it.earningAmount, it == selectedDailyReport)
         } ?: arrayListOf()
     }
 
     private fun toEarningUiModel(earning: Earning) : EarningUiModel {
-        return EarningUiModel(earning.earningType, earning.amount)
+        return EarningUiModel(earning.id, earning.earningType, earning.amount)
     }
 
     /**
@@ -128,17 +128,17 @@ class MainViewModel : ViewModel(), LifecycleObserver {
      *  the state of the App.
      *  Ideally it should act as a Mediator to take events from different components and act as a passage
      */
-    fun updateWeek(week: WeekUiModel) {
+    fun updateWeek(selectedWeekId: String) {
         with(appState) {
-            selectedWeek.value = weeks.value.firstOrNull { it.week == week.week }
+            selectedWeek.value = weeks.value.firstOrNull { it.id == selectedWeekId }
         }
     }
 
 
-    fun updateDay(weekDay: String) {
+    fun updateDay(selectedWeekdayId: String) {
         with(appState) {
             selectedDay.value =
-                selectedWeek.value?.dailyReports?.firstOrNull { it.day == weekDay }
+                selectedWeek.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
         }
 
     }

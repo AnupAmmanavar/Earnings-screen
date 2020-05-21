@@ -55,7 +55,9 @@ interface WeekUIDelegate : UIDelegate {
 }
 
 
+// TODO create an interface for unique identifier
 data class WeekUiModel(
+    val id: String,
     val week: String, // Week 21
     val earning: Double, // 200
     val isSelected: Boolean
