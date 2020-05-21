@@ -73,7 +73,9 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
             selectedDay
                 .map {
-                    it?.earnings?.map { uiMapper.toEarningUiModel(it) } ?: arrayListOf()
+                    it?.let { dailyReport ->
+                        uiMapper.toEarningUiModels(dailyReport)
+                    } ?: arrayListOf()
                 }
                 .onEach { uiState.earningsUiModel.value = it }
                 .launchIn(viewModelScope)
