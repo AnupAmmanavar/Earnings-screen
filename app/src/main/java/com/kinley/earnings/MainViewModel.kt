@@ -4,16 +4,13 @@ package com.kinley.earnings
 
 import androidx.lifecycle.*
 import com.kinley.earnings.entities.DailyReport
-import com.kinley.earnings.entities.Earning
 import com.kinley.earnings.entities.WeeklyReport
-import com.kinley.ui.earningcomponent.EarningUiModel
-import com.kinley.ui.weekcomponent.WeekUiModel
-import com.kinley.ui.weekdaycomponent.WeekdayUiModel
 import kotlinx.coroutines.flow.*
 
 class MainViewModel : ViewModel(), LifecycleObserver {
 
     private val repository = Repository()
+    private val uiMapper = UiMapper()
 
     // App State
     private val appState = AppState()
@@ -43,7 +40,7 @@ class MainViewModel : ViewModel(), LifecycleObserver {
         with(appState) {
             weeks
                 .combine(selectedWeek) { weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
-                    toWeeksUiModels(weeks, selectedWeeklyReport)
+                    uiMapper.toWeeksUiModels(weeks, selectedWeeklyReport)
                 }
                 .onEach { uiState.weeksUiModel.value = it }
                 .launchIn(viewModelScope)
@@ -61,7 +58,7 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
             selectedWeek
                 .combine(selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
-                    toWeekdayUiModels(selectedWeek, selectedDailyReport)
+                    uiMapper.toWeekdayUiModels(selectedWeek, selectedDailyReport)
                 }
                 .onEach { uiState.daysUiModel.value = it }
                 .launchIn(viewModelScope)
@@ -76,7 +73,7 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
             selectedDay
                 .map {
-                    it?.earnings?.map(this@MainViewModel::toEarningUiModel) ?: arrayListOf()
+                    it?.earnings?.map { uiMapper.toEarningUiModel(it) } ?: arrayListOf()
                 }
                 .onEach { uiState.earningsUiModel.value = it }
                 .launchIn(viewModelScope)
@@ -105,27 +102,9 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
 
     /**
-     * UI-Mappers. Domain to UiModels
-     * Having separated out lets you define the dependencies clearly.
-     * More of a readability purpose. Can be moved out to a separate class
-     */
-    private fun toWeeksUiModels(weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport?): List<WeekUiModel> {
-        return weeks.map { WeekUiModel(it.id, it.week, it.earnings, it == selectedWeeklyReport) }
-    }
-
-    private fun toWeekdayUiModels(selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport?) : List<WeekdayUiModel> {
-        return selectedWeek?.dailyReports?.map {
-            WeekdayUiModel(it.id, it.day, it.date, it.earningAmount, it == selectedDailyReport)
-        } ?: arrayListOf()
-    }
-
-    private fun toEarningUiModel(earning: Earning) : EarningUiModel {
-        return EarningUiModel(earning.id, earning.earningType, earning.amount)
-    }
-
-    /**
      * If you consider the ViewModel as store then, this function is an action to change
-     *  the state of the App.
+     *  the state of the App - StateReducer
+     *  Improvement - Make it an interface so that different components can include it(loosely coupled)
      *  Ideally it should act as a Mediator to take events from different components and act as a passage
      */
     fun updateWeek(selectedWeekId: String) {
@@ -137,10 +116,8 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
     fun updateDay(selectedWeekdayId: String) {
         with(appState) {
-            selectedDay.value =
-                selectedWeek.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
+            selectedDay.value = selectedWeek.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
         }
-
     }
 }
 
