@@ -3,9 +3,11 @@
 package com.kinley.earnings
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.kinley.ui.EarningsBindingModel_
 import com.kinley.ui.WeekBindingModel_
 import com.kinley.ui.WeekdayBindingModel_
 import com.kinley.ui.weekcomponent.WeekUiModel
@@ -48,6 +50,20 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
                 WeekdayBindingModel_()
                     .id(it.day)
                     .weekdayUiModel(it)
+                    .onClick { v ->
+                        vm.updateDay(it.day)
+                    }
+                    .addTo(this)
+            }
+        }
+
+        rv_earnings.withModels {
+            val list = vm.uiState.earningsUiModel.value
+
+            list.map {
+                EarningsBindingModel_()
+                    .id("${it.earningType} ${it.amount}") // Add identifier
+                    .uiModel(it)
                     .addTo(this)
             }
         }
@@ -61,6 +77,10 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
         // Observe for the changes in weekdays
         lifecycleScope.launch {
             vm.uiState.daysUiModel.collect { rv_weekdays.requestModelBuild() }
+        }
+
+        lifecycleScope.launch {
+            vm.uiState.earningsUiModel.collect { rv_earnings.requestModelBuild() }
         }
 
     }
