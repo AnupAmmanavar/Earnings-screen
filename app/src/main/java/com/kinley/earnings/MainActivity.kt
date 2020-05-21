@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
         // Defining the view of weeks
         rv_weeks.withModels {
-            val list = vm.weeksUiModel.value
+            val list = vm.uiState.weeksUiModel.value
 
             list.map {
                 WeekBindingModel_()
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
         // Defining the view of weekdays
         rv_weekdays.withModels {
-            val list = vm.daysUiModel.value
+            val list = vm.uiState.daysUiModel.value
 
             list.map {
                 WeekdayBindingModel_()
@@ -55,12 +55,12 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
 
         // Observe for the changes in weeks
         lifecycleScope.launch {
-            vm.weeksUiModel.collect { rv_weeks.requestModelBuild() }
+            vm.uiState.weeksUiModel.collect { rv_weeks.requestModelBuild() }
         }
 
         // Observe for the changes in weekdays
         lifecycleScope.launch {
-            vm.daysUiModel.collect { rv_weekdays.requestModelBuild() }
+            vm.uiState.daysUiModel.collect { rv_weekdays.requestModelBuild() }
         }
 
     }
