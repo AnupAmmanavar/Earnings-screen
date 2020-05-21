@@ -14,6 +14,8 @@ import com.kinley.ui.weekcomponent.WeekUiModel
 import com.kinley.ui.weekcomponent.WeekVMDelegate
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), WeekVMDelegate {
@@ -69,18 +71,11 @@ class MainActivity : AppCompatActivity(), WeekVMDelegate {
         }
 
 
-        // Observe for the changes in weeks
+        // Observe for the changes in each of the components and re-build their UI
         lifecycleScope.launch {
-            vm.uiState.weeksUiModel.collect { rv_weeks.requestModelBuild() }
-        }
-
-        // Observe for the changes in weekdays
-        lifecycleScope.launch {
-            vm.uiState.daysUiModel.collect { rv_weekdays.requestModelBuild() }
-        }
-
-        lifecycleScope.launch {
-            vm.uiState.earningsUiModel.collect { rv_earnings.requestModelBuild() }
+            vm.uiState.weeksUiModel.onEach { rv_weeks.requestModelBuild() }.launchIn(this)
+            vm.uiState.daysUiModel.onEach { rv_weekdays.requestModelBuild() }.launchIn(this)
+            vm.uiState.earningsUiModel.onEach { rv_earnings.requestModelBuild() }.launchIn(this)
         }
 
     }

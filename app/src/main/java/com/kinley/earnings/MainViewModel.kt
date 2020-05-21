@@ -8,10 +8,7 @@ import com.kinley.earnings.entities.WeeklyReport
 import com.kinley.ui.earningcomponent.EarningUiModel
 import com.kinley.ui.weekcomponent.WeekUiModel
 import com.kinley.ui.weekdaycomponent.WeekdayUiModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
 class MainViewModel : ViewModel(), LifecycleObserver {
 
@@ -27,9 +24,9 @@ class MainViewModel : ViewModel(), LifecycleObserver {
     private fun onResume() {
         appState._weeks.value = repository.fetchWeeks()
 
-        viewModelScope.launch { defineWeeksUiModel() }
-        viewModelScope.launch { defineDaysUiModel() }
-        viewModelScope.launch { defineEarningsUiModel() }
+        defineWeeksUiModel()
+        defineDaysUiModel()
+        defineEarningsUiModel()
 
     }
 
@@ -38,19 +35,20 @@ class MainViewModel : ViewModel(), LifecycleObserver {
      * WeeksUIState = f(list of weeks, selected week).
      * The change in the any of the dependent values will trigger a change in UIState
      */
-    private suspend fun defineWeeksUiModel() {
+    private fun defineWeeksUiModel() {
         appState._weeks
             .combine(appState._selectedWeek) { list: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
                 list.map { WeekUiModel(it.week, it.earnings, it == selectedWeeklyReport) }
             }
-            .collect { uiState.weeksUiModel.value = it }
+            .onEach { uiState.weeksUiModel.value = it }
+            .launchIn(viewModelScope)
     }
 
     /**
      * UI is a function of state
      * WeekdaysUIState = f(selectedWeek, selectedWeekDay)
      */
-    private suspend fun defineDaysUiModel() {
+    private fun defineDaysUiModel() {
         appState._selectedWeek
             .combine(appState._selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
                 selectedWeek?.dailyReports?.map {
@@ -63,31 +61,35 @@ class MainViewModel : ViewModel(), LifecycleObserver {
                 }
                     ?: arrayListOf()
             }
-            .collect { uiState.daysUiModel.value = it }
+            .onEach { uiState.daysUiModel.value = it }
+            .launchIn(viewModelScope)
     }
 
-    private suspend fun defineEarningsUiModel() {
+    private fun defineEarningsUiModel() {
+        /**
+         * Change of selected day should set the earnings view to that day's earning
+         */
+        appState._selectedDay
+            .map {
+                it?.earnings?.map { earning ->
+                    EarningUiModel(earning.earningType, earning.amount)
+                } ?: arrayListOf()
+            }
+            .onEach {
+                uiState.earningsUiModel.value = it
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
 
-            appState._selectedDay
-                .map {
-                    it?.earnings?.map { earning ->
-                        EarningUiModel(earning.earningType, earning.amount)
-                    } ?: arrayListOf()
-                }
-                .collect {
-                    uiState.earningsUiModel.value = it
-                }
-        }
+        /**
+         * A new week should result in resetting the earnings view
+         */
+        appState._selectedWeek
+            .onEach {
+                uiState.earningsUiModel.value = arrayListOf()
+            }
+            .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-
-            appState._selectedWeek
-                .collect {
-                    uiState.earningsUiModel.value = arrayListOf()
-                }
-        }
     }
 
     /**
