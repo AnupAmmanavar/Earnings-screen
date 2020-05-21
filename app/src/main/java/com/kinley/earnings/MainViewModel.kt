@@ -22,44 +22,43 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onResume() {
-        appState._weeks.value = repository.fetchWeeks()
+        appState.weeks.value = repository.fetchWeeks()
 
         defineWeeksUiModel()
         defineDaysUiModel()
         defineEarningsUiModel()
 
+        defineStateDependencies()
+
     }
 
-    /**
-     * UI is a function of state
-     * WeeksUIState = f(list of weeks, selected week).
-     * The change in the any of the dependent values will trigger a change in UIState
-     */
     private fun defineWeeksUiModel() {
-        appState._weeks
-            .combine(appState._selectedWeek) { list: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
+
+        /**
+         * UI to state relation
+         * WeeksUIState = f(list of weeks, selected week)
+         * The change in the any of the dependent values(list of weeks and selected week) will trigger a change in UIState
+         */
+        appState.weeks
+            .combine(appState.selectedWeek) { list: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
                 list.map { WeekUiModel(it.week, it.earnings, it == selectedWeeklyReport) }
             }
             .onEach { uiState.weeksUiModel.value = it }
             .launchIn(viewModelScope)
     }
 
-    /**
-     * UI is a function of state
-     * WeekdaysUIState = f(selectedWeek, selectedWeekDay)
-     */
+
     private fun defineDaysUiModel() {
-        appState._selectedWeek
-            .combine(appState._selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
+        /**
+         * UI to state relation
+         * WeekdaysUIState = f(selectedWeek, selectedWeekDay)
+         */
+
+        appState.selectedWeek
+            .combine(appState.selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
                 selectedWeek?.dailyReports?.map {
-                    WeekdayUiModel(
-                        it.day,
-                        it.date,
-                        it.earningAmount,
-                        it == selectedDailyReport
-                    )
-                }
-                    ?: arrayListOf()
+                    WeekdayUiModel(it.day, it.date, it.earningAmount, it == selectedDailyReport)
+                } ?: arrayListOf()
             }
             .onEach { uiState.daysUiModel.value = it }
             .launchIn(viewModelScope)
@@ -69,7 +68,7 @@ class MainViewModel : ViewModel(), LifecycleObserver {
         /**
          * Change of selected day should set the earnings view to that day's earning
          */
-        appState._selectedDay
+        appState.selectedDay
             .map {
                 it?.earnings?.map { earning ->
                     EarningUiModel(earning.earningType, earning.amount)
@@ -80,15 +79,24 @@ class MainViewModel : ViewModel(), LifecycleObserver {
             }
             .launchIn(viewModelScope)
 
+    }
 
-        /**
-         * A new week should result in resetting the earnings view
-         */
-        appState._selectedWeek
-            .onEach {
-                uiState.earningsUiModel.value = arrayListOf()
-            }
-            .launchIn(viewModelScope)
+    /**
+     * Some of the variables in the state are inter-dependent
+     * For example -  a change in the SelectedWeek should update SelectedDay
+     */
+    private fun defineStateDependencies() {
+
+        // State relation - A change in week should set the current day to the first day of the week
+        with(appState) {
+
+            selectedWeek
+                .onEach { weeklyReport ->
+                    // By default the first day of the week is selected
+                    selectedDay.value = weeklyReport?.dailyReports?.getOrNull(0)
+                }
+                .launchIn(viewModelScope)
+        }
 
     }
 
@@ -99,15 +107,15 @@ class MainViewModel : ViewModel(), LifecycleObserver {
      */
     fun updateWeek(week: WeekUiModel) {
         with(appState) {
-            _selectedWeek.value = _weeks.value.firstOrNull { it.week == week.week }
+            selectedWeek.value = weeks.value.firstOrNull { it.week == week.week }
         }
     }
 
 
     fun updateDay(weekDay: String) {
         with(appState) {
-            _selectedDay.value =
-                _selectedWeek.value?.dailyReports?.firstOrNull { it.day == weekDay }
+            selectedDay.value =
+                selectedWeek.value?.dailyReports?.firstOrNull { it.day == weekDay }
         }
 
     }
