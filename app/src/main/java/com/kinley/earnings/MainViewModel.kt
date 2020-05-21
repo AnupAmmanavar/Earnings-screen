@@ -4,6 +4,7 @@ package com.kinley.earnings
 
 import androidx.lifecycle.*
 import com.kinley.earnings.entities.DailyReport
+import com.kinley.earnings.entities.Earning
 import com.kinley.earnings.entities.WeeklyReport
 import com.kinley.ui.earningcomponent.EarningUiModel
 import com.kinley.ui.weekcomponent.WeekUiModel
@@ -39,12 +40,14 @@ class MainViewModel : ViewModel(), LifecycleObserver {
          * WeeksUIState = f(list of weeks, selected week)
          * The change in the any of the dependent values(list of weeks and selected week) will trigger a change in UIState
          */
-        appState.weeks
-            .combine(appState.selectedWeek) { list: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
-                list.map { WeekUiModel(it.week, it.earnings, it == selectedWeeklyReport) }
-            }
-            .onEach { uiState.weeksUiModel.value = it }
-            .launchIn(viewModelScope)
+        with(appState) {
+            weeks
+                .combine(selectedWeek) { weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
+                    toWeeksUiModels(weeks, selectedWeeklyReport)
+                }
+                .onEach { uiState.weeksUiModel.value = it }
+                .launchIn(viewModelScope)
+        }
     }
 
 
@@ -54,30 +57,30 @@ class MainViewModel : ViewModel(), LifecycleObserver {
          * WeekdaysUIState = f(selectedWeek, selectedWeekDay)
          */
 
-        appState.selectedWeek
-            .combine(appState.selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
-                selectedWeek?.dailyReports?.map {
-                    WeekdayUiModel(it.day, it.date, it.earningAmount, it == selectedDailyReport)
-                } ?: arrayListOf()
-            }
-            .onEach { uiState.daysUiModel.value = it }
-            .launchIn(viewModelScope)
+        with(appState) {
+
+            selectedWeek
+                .combine(selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
+                    toWeekdayUiModels(selectedWeek, selectedDailyReport)
+                }
+                .onEach { uiState.daysUiModel.value = it }
+                .launchIn(viewModelScope)
+        }
     }
 
     private fun defineEarningsUiModel() {
         /**
          * Change of selected day should set the earnings view to that day's earning
          */
-        appState.selectedDay
-            .map {
-                it?.earnings?.map { earning ->
-                    EarningUiModel(earning.earningType, earning.amount)
-                } ?: arrayListOf()
-            }
-            .onEach {
-                uiState.earningsUiModel.value = it
-            }
-            .launchIn(viewModelScope)
+        with(appState) {
+
+            selectedDay
+                .map {
+                    it?.earnings?.map(this@MainViewModel::toEarningUiModel) ?: arrayListOf()
+                }
+                .onEach { uiState.earningsUiModel.value = it }
+                .launchIn(viewModelScope)
+        }
 
     }
 
@@ -98,6 +101,26 @@ class MainViewModel : ViewModel(), LifecycleObserver {
                 .launchIn(viewModelScope)
         }
 
+    }
+
+
+    /**
+     * UI-Mappers. Domain to UiModels
+     * Having separated out lets you define the dependencies clearly.
+     * More of a readability purpose. Can be moved out to a separate class
+     */
+    private fun toWeeksUiModels(weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport?): List<WeekUiModel> {
+        return weeks.map { WeekUiModel(it.week, it.earnings, it == selectedWeeklyReport) }
+    }
+
+    private fun toWeekdayUiModels(selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport?) : List<WeekdayUiModel> {
+        return selectedWeek?.dailyReports?.map {
+            WeekdayUiModel(it.day, it.date, it.earningAmount, it == selectedDailyReport)
+        } ?: arrayListOf()
+    }
+
+    private fun toEarningUiModel(earning: Earning) : EarningUiModel {
+        return EarningUiModel(earning.earningType, earning.amount)
     }
 
     /**
