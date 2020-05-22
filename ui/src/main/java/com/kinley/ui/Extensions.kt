@@ -10,3 +10,8 @@ fun TextView.setBold(isBold: Boolean) {
         if (isBold) Typeface.DEFAULT_BOLD
         else Typeface.DEFAULT
 }
+
+@BindingAdapter("amount")
+fun TextView.setAmount(amount: Double) {
+    text = "Rs $amount"
+}
