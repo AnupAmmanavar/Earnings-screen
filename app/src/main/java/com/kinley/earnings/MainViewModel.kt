@@ -20,7 +20,7 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onResume() {
-        appState.weeks.value = repository.fetchWeeks()
+        appState.weeklyReports.value = repository.fetchWeeks()
 
         defineWeeksUiModel()
         defineDaysUiModel()
@@ -38,9 +38,9 @@ class MainViewModel : ViewModel(), LifecycleObserver {
          * The change in the any of the dependent values(list of weeks and selected week) will trigger a change in UIState
          */
         with(appState) {
-            weeks
-                .combine(selectedWeek) { weeks: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
-                    uiMapper.toWeeksUiModels(weeks, selectedWeeklyReport)
+            weeklyReports
+                .combine(selectedWeeklyReport) { weeklyReports: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
+                    uiMapper.toWeeksUiModels(weeklyReports, selectedWeeklyReport)
                 }
                 .onEach { uiState.weeksUiModel.value = it }
                 .launchIn(viewModelScope)
@@ -56,11 +56,11 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
         with(appState) {
 
-            selectedWeek
-                .combine(selectedDay) { selectedWeek: WeeklyReport?, selectedDailyReport: DailyReport? ->
-                    uiMapper.toWeekdayUiModels(selectedWeek, selectedDailyReport)
+            selectedWeeklyReport
+                .combine(selectedDailyReport) { selectedWeeklyReport: WeeklyReport?, selectedDailyReport: DailyReport? ->
+                    uiMapper.toWeekdayUiModels(selectedWeeklyReport, selectedDailyReport)
                 }
-                .onEach { uiState.daysUiModel.value = it }
+                .onEach { uiState.weekdaysUiModel.value = it }
                 .launchIn(viewModelScope)
         }
     }
@@ -71,11 +71,9 @@ class MainViewModel : ViewModel(), LifecycleObserver {
          */
         with(appState) {
 
-            selectedDay
+            selectedDailyReport
                 .map {
-                    it?.let { dailyReport ->
-                        uiMapper.toEarningUiModels(dailyReport)
-                    } ?: arrayListOf()
+                    uiMapper.toEarningUiModels(it)
                 }
                 .onEach { uiState.earningsUiModel.value = it }
                 .launchIn(viewModelScope)
@@ -92,10 +90,10 @@ class MainViewModel : ViewModel(), LifecycleObserver {
         // State relation - A change in week should set the current day to the first day of the week
         with(appState) {
 
-            selectedWeek
+            selectedWeeklyReport
                 .onEach { weeklyReport ->
                     // By default the first day of the week is selected
-                    selectedDay.value = weeklyReport?.dailyReports?.getOrNull(0)
+                    selectedDailyReport.value = weeklyReport?.dailyReports?.getOrNull(0)
                 }
                 .launchIn(viewModelScope)
         }
@@ -111,14 +109,14 @@ class MainViewModel : ViewModel(), LifecycleObserver {
      */
     fun updateWeek(selectedWeekId: String) {
         with(appState) {
-            selectedWeek.value = weeks.value.firstOrNull { it.id == selectedWeekId }
+            selectedWeeklyReport.value = weeklyReports.value.firstOrNull { it.id == selectedWeekId }
         }
     }
 
 
     fun updateDay(selectedWeekdayId: String) {
         with(appState) {
-            selectedDay.value = selectedWeek.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
+            selectedDailyReport.value = selectedWeeklyReport.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
         }
     }
 }

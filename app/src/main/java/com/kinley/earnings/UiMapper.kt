@@ -8,7 +8,7 @@ import com.kinley.ui.weekdaycomponent.WeekdayUiModel
 
 /**
  * UI-Mappers. AppState to UiModels
- * Having separated out lets you define the dependencies clearly. More of a readability purpose.
+ * Having it separated out lets you define the dependencies clearly. More of a readability purpose.
  */
 class UiMapper {
 
@@ -16,10 +16,10 @@ class UiMapper {
      * Read as [WeekUiModel] is dependent on list of [WeeklyReport] and selected [WeeklyReport]
      */
     fun toWeeksUiModels(
-        weeks: List<WeeklyReport>,
+        weeklyReports: List<WeeklyReport>,
         selectedWeeklyReport: WeeklyReport?
     ): List<WeekUiModel> {
-        return weeks.map {
+        return weeklyReports.map {
             WeekUiModel(
                 it.id,
                 it.week,
@@ -33,10 +33,10 @@ class UiMapper {
      * Read as [WeekdayUiModel] is dependent on selected [WeeklyReport] and selected [DailyReport]
      */
     fun toWeekdayUiModels(
-        selectedWeek: WeeklyReport?,
+        selectedWeeklyReport: WeeklyReport?,
         selectedDailyReport: DailyReport?
     ): List<WeekdayUiModel> {
-        return selectedWeek?.dailyReports?.map {
+        return selectedWeeklyReport?.dailyReports?.map {
             WeekdayUiModel(
                 it.id,
                 it.day,
@@ -50,9 +50,9 @@ class UiMapper {
     /**
      * Read as [EarningUiModel] is dependent on [DailyReport]
      */
-    fun toEarningUiModels(dailyReport: DailyReport): List<EarningUiModel> {
+    fun toEarningUiModels(selectedDailyReport: DailyReport?): List<EarningUiModel> {
 
-        val earnings = dailyReport.earnings
+        val earnings = selectedDailyReport?.earnings ?: arrayListOf()
         return earnings.map { earning ->
             EarningUiModel(
                 earning.id,

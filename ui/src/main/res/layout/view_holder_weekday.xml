@@ -41,7 +41,7 @@
             android:layout_marginEnd="8dp"
             tools:text="@string/test_day"
             app:textBold="@{weekdayUiModel.selected}"
-            android:text="@{`Rs` + weekdayUiModel.earning}"
+            app:amount="@{weekdayUiModel.earning}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

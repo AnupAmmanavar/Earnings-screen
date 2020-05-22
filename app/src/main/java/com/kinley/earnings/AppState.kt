@@ -7,7 +7,7 @@ import com.kinley.earnings.entities.WeeklyReport
 import kotlinx.coroutines.flow.MutableStateFlow
 
 data class AppState(
-    val weeks: MutableStateFlow<List<WeeklyReport>> = MutableStateFlow(arrayListOf()),
-    val selectedWeek: MutableStateFlow<WeeklyReport?> = MutableStateFlow(null),
-    val selectedDay: MutableStateFlow<DailyReport?> = MutableStateFlow(null)
+    val weeklyReports: MutableStateFlow<List<WeeklyReport>> = MutableStateFlow(arrayListOf()),
+    val selectedWeeklyReport: MutableStateFlow<WeeklyReport?> = MutableStateFlow(null),
+    val selectedDailyReport: MutableStateFlow<DailyReport?> = MutableStateFlow(null)
 )
