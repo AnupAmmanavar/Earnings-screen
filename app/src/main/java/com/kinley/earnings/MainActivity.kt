@@ -41,10 +41,13 @@ class MainActivity : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
 
 
         // Observe for the changes in each of the components and re-build their UI
-        lifecycleScope.launch {
-            vm.uiState.weeksUiModel.onEach { rv_weeks.requestModelBuild() }.launchIn(this)
-            vm.uiState.weekdaysUiModel.onEach { rv_weekdays.requestModelBuild() }.launchIn(this)
-            vm.uiState.earningsUiModel.onEach { rv_earnings.requestModelBuild() }.launchIn(this)
+
+
+        with(vm.uiState) {
+            weeksUiModel.onEach { rv_weeks.requestModelBuild() }.launchIn(lifecycleScope)
+            weekdaysUiModel.onEach { rv_weekdays.requestModelBuild() }.launchIn(lifecycleScope)
+            earningsUiModel.onEach { rv_earnings.requestModelBuild() }.launchIn(lifecycleScope)
+
         }
 
     }
