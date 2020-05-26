@@ -8,9 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.epoxy.EpoxyController
 import com.airbnb.epoxy.EpoxyModel
-import com.kinley.ui.EarningsBindingModel_
-import com.kinley.ui.WeekBindingModel_
-import com.kinley.ui.WeekdayBindingModel_
 import com.kinley.ui.earningcomponent.EarningUiDelegate
 import com.kinley.ui.weekcomponent.WeekUIDelegate
 import com.kinley.ui.weekcomponent.WeekUiModel
@@ -31,13 +28,22 @@ class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate, Ear
         lifecycle.addObserver(vm)
 
         // Defining the view of weeks
-        rv_weeks.withModels { createWeekModels(this@EarningsPage).render(this) }
+        rv_weeks.withModels {
+            (vm.components.weekUXComponent.value?.render(this@EarningsPage)
+                ?: arrayListOf()).update(this)
+        }
 
         // Defining the view of weekdays
-        rv_weekdays.withModels { createWeekdaysModels(this@EarningsPage).render(this) }
+        rv_weekdays.withModels {
+            (vm.components.weekdayUXComponent.value?.render(this@EarningsPage)
+                ?: arrayListOf()).update(this)
+        }
 
         // Defining the views of earnings
-        rv_earnings.withModels { createEarningsModels(this@EarningsPage).render(this) }
+        rv_earnings.withModels {
+            (vm.components.earningUXComponent.value?.render(this@EarningsPage)
+                ?: arrayListOf()).update(this)
+        }
 
 
         // Observe for the changes in each of the components and re-build their UI
@@ -50,34 +56,12 @@ class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate, Ear
 
     }
 
-    override fun onWeekSelected(week: WeekUiModel) {
-
-    }
-
-    override fun onWeekdaySelected(weekdayUModel: WeekdayUiModel) {
-
-    }
-
-
-    // ENHANCEMENT : Move the creation of Views outside of this class
-    private fun createWeekModels(uiDelegate: WeekUIDelegate): List<EpoxyModel<*>> {
-        return vm.components.weekUXComponent.value?.render(uiDelegate) ?: arrayListOf()
-    }
-
-    private fun createWeekdaysModels(uiDelegate: WeekdayUIDelegate): List<EpoxyModel<*>> {
-        return vm.components.weekdayUXComponent.value?.render(uiDelegate) ?: arrayListOf()
-    }
-
-    private fun createEarningsModels(earningUiDelegate: EarningUiDelegate): List<EpoxyModel<*>> {
-        return vm.components.earningUXComponent.value?.render(earningUiDelegate) ?: arrayListOf()
-    }
-
     override fun onEarningClick(earningId: String) {
-
+        // Navigation
     }
 }
 
-fun <T : EpoxyModel<*>> List<T>.render(controller: EpoxyController) {
+fun <T : EpoxyModel<*>> List<T>.update(controller: EpoxyController) {
     this.forEach { it.addTo(controller) }
 }
 

@@ -27,9 +27,7 @@ interface WeekdayVMDelegate : VMDelegate {
     fun onWeekdaySelected(weekdayUModel: WeekdayUiModel)
 }
 
-interface WeekdayUIDelegate : UIDelegate {
-    fun onWeekdaySelected(weekdayUModel: WeekdayUiModel)
-}
+interface WeekdayUIDelegate : UIDelegate
 
 data class WeekdayUiModel(
     val id: String,

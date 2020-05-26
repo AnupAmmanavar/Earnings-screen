@@ -43,9 +43,7 @@ interface WeekVMDelegate : VMDelegate {
     fun onWeekSelected(week: WeekUiModel)
 }
 
-interface WeekUIDelegate : UIDelegate {
-    fun onWeekSelected(week: WeekUiModel)
-}
+interface WeekUIDelegate : UIDelegate
 
 
 // TODO create an interface for unique identifier
