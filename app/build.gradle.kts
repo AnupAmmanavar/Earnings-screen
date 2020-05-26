@@ -1,10 +1,10 @@
 plugins {
     id(BuildPlugins.androidApplication)
-    kotlin("android")
+//    kotlin("android")
     id(BuildPlugins.kotlinAndroid)
     id(BuildPlugins.kotlinAndroidExt)
     id(BuildPlugins.kotlinKapt)
-    kotlin("kapt")
+//    kotlin("kapt")
 }
 
 android {

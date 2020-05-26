@@ -11,6 +11,7 @@ import com.airbnb.epoxy.EpoxyModel
 import com.kinley.ui.EarningsBindingModel_
 import com.kinley.ui.WeekBindingModel_
 import com.kinley.ui.WeekdayBindingModel_
+import com.kinley.ui.earningcomponent.EarningUiDelegate
 import com.kinley.ui.weekcomponent.WeekUIDelegate
 import com.kinley.ui.weekcomponent.WeekUiModel
 import com.kinley.ui.weekdaycomponent.WeekdayUIDelegate
@@ -19,7 +20,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
+class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate, EarningUiDelegate {
 
     private val vm: EarningsPageViewModel by viewModels()
 
@@ -36,68 +37,43 @@ class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
         rv_weekdays.withModels { createWeekdaysModels(this@EarningsPage).render(this) }
 
         // Defining the views of earnings
-        rv_earnings.withModels { createEarningsModels().render(this) }
+        rv_earnings.withModels { createEarningsModels(this@EarningsPage).render(this) }
 
 
         // Observe for the changes in each of the components and re-build their UI
 
-
-        with(vm.uiState) {
-            weeksUiModel.onEach { rv_weeks.requestModelBuild() }.launchIn(lifecycleScope)
-            weekdaysUiModel.onEach { rv_weekdays.requestModelBuild() }.launchIn(lifecycleScope)
-            earningsUiModel.onEach { rv_earnings.requestModelBuild() }.launchIn(lifecycleScope)
-
+        with(vm.components) {
+            weekUXComponent.onEach { rv_weeks.requestModelBuild() }.launchIn(lifecycleScope)
+            weekdayUXComponent.onEach { rv_weekdays.requestModelBuild() }.launchIn(lifecycleScope)
+            earningUXComponent.onEach { rv_earnings.requestModelBuild() }.launchIn(lifecycleScope)
         }
 
     }
 
     override fun onWeekSelected(week: WeekUiModel) {
-        vm.updateWeek(week.id)
+
     }
 
     override fun onWeekdaySelected(weekdayUModel: WeekdayUiModel) {
-        vm.updateDay(weekdayUModel.id)
+
     }
 
 
     // ENHANCEMENT : Move the creation of Views outside of this class
     private fun createWeekModels(uiDelegate: WeekUIDelegate): List<EpoxyModel<*>> {
-        val list = vm.uiState.weeksUiModel.value
-
-        return list.map {
-            WeekBindingModel_()
-                .id(it.id)
-                .weekUiModel(it)
-                .onClick { _ ->
-                    uiDelegate.onWeekSelected(it)
-                }
-        }
-
+        return vm.components.weekUXComponent.value?.render(uiDelegate) ?: arrayListOf()
     }
 
     private fun createWeekdaysModels(uiDelegate: WeekdayUIDelegate): List<EpoxyModel<*>> {
-        val list = vm.uiState.weekdaysUiModel.value
-
-        return list.map {
-            WeekdayBindingModel_()
-                .id(it.id)
-                .weekdayUiModel(it)
-                .onClick { v ->
-                    uiDelegate.onWeekdaySelected(it)
-                }
-
-        }
+        return vm.components.weekdayUXComponent.value?.render(uiDelegate) ?: arrayListOf()
     }
 
-    private fun createEarningsModels(): List<EpoxyModel<*>> {
-        val list = vm.uiState.earningsUiModel.value
+    private fun createEarningsModels(earningUiDelegate: EarningUiDelegate): List<EpoxyModel<*>> {
+        return vm.components.earningUXComponent.value?.render(earningUiDelegate) ?: arrayListOf()
+    }
 
-        return list.map {
-            EarningsBindingModel_()
-                .id(it.id)
-                .uiModel(it)
+    override fun onEarningClick(earningId: String) {
 
-        }
     }
 }
 

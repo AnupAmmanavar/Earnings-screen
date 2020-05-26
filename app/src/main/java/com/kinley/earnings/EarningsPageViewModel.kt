@@ -5,9 +5,17 @@ package com.kinley.earnings
 import androidx.lifecycle.*
 import com.kinley.earnings.entities.DailyReport
 import com.kinley.earnings.entities.WeeklyReport
+import com.kinley.ui.earningcomponent.EarningUXComponent
+import com.kinley.ui.earningcomponent.EarningVmDelegate
+import com.kinley.ui.weekcomponent.HorizontalWeekUXComponent
+import com.kinley.ui.weekcomponent.WeekUiModel
+import com.kinley.ui.weekcomponent.WeekVMDelegate
+import com.kinley.ui.weekdaycomponent.WeekdayUXComponent
+import com.kinley.ui.weekdaycomponent.WeekdayUiModel
+import com.kinley.ui.weekdaycomponent.WeekdayVMDelegate
 import kotlinx.coroutines.flow.*
 
-class EarningsPageViewModel : ViewModel(), LifecycleObserver {
+class EarningsPageViewModel : ViewModel(), LifecycleObserver, WeekVMDelegate, WeekdayVMDelegate, EarningVmDelegate {
 
     private val repository = Repository()
     private val uiMapper = UiMapper()
@@ -16,7 +24,7 @@ class EarningsPageViewModel : ViewModel(), LifecycleObserver {
     private val appState = AppState()
 
     // UI State
-    val uiState = UIState()
+    val components = ComponentHolder()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun onResume() {
@@ -42,7 +50,10 @@ class EarningsPageViewModel : ViewModel(), LifecycleObserver {
                 combine(weeklyReports, selectedWeeklyReport) { weeklyReports: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
                     uiMapper.toWeeksUiModels(weeklyReports, selectedWeeklyReport)
                 }
-                .onEach { uiState.weeksUiModel.value = it }
+                .onEach { components.weekUXComponent.value = HorizontalWeekUXComponent(
+                    it,
+                    this@EarningsPageViewModel
+                ) }
                 .launchIn(viewModelScope)
         }
     }
@@ -59,7 +70,10 @@ class EarningsPageViewModel : ViewModel(), LifecycleObserver {
             combine(selectedWeeklyReport, selectedDailyReport) { selectedWeeklyReport: WeeklyReport?, selectedDailyReport: DailyReport? ->
                 uiMapper.toWeekdayUiModels(selectedWeeklyReport, selectedDailyReport)
             }
-             .onEach { uiState.weekdaysUiModel.value = it }
+             .onEach { components.weekdayUXComponent.value = WeekdayUXComponent(
+                 it,
+                 this@EarningsPageViewModel
+             ) }
              .launchIn(viewModelScope)
         }
     }
@@ -74,7 +88,10 @@ class EarningsPageViewModel : ViewModel(), LifecycleObserver {
                 .map {
                     uiMapper.toEarningUiModels(it)
                 }
-                .onEach { uiState.earningsUiModel.value = it }
+                .onEach { components.earningUXComponent.value = EarningUXComponent(
+                    it,
+                    this@EarningsPageViewModel
+                ) }
                 .launchIn(viewModelScope)
         }
 
@@ -106,17 +123,25 @@ class EarningsPageViewModel : ViewModel(), LifecycleObserver {
      *  Improvement - Make it an interface so that different components can include it(loosely coupled)
      *  Ideally it should act as a Mediator to take events from different components and act as a passage
      */
-    fun updateWeek(selectedWeekId: String) {
+    private fun updateWeek(selectedWeekId: String) {
         with(appState) {
             selectedWeeklyReport.value = weeklyReports.value.firstOrNull { it.id == selectedWeekId }
         }
     }
 
 
-    fun updateDay(selectedWeekdayId: String) {
+    private fun updateDay(selectedWeekdayId: String) {
         with(appState) {
             selectedDailyReport.value = selectedWeeklyReport.value?.dailyReports?.firstOrNull { it.id == selectedWeekdayId }
         }
+    }
+
+    override fun onWeekSelected(week: WeekUiModel) {
+        updateWeek(week.id)
+    }
+
+    override fun onWeekdaySelected(weekdayUModel: WeekdayUiModel) {
+        updateDay(weekdayUModel.id)
     }
 }
 

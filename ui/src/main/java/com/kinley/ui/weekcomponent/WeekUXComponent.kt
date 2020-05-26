@@ -1,6 +1,5 @@
 package com.kinley.ui.weekcomponent
 
-import com.airbnb.epoxy.CarouselModel_
 import com.airbnb.epoxy.EpoxyModel
 import com.kinley.ui.WeekBindingModel_
 import com.kinley.ui.uxcomponent.UIDelegate
@@ -28,20 +27,14 @@ class WeekUXComponent(
 }
 
 class HorizontalWeekUXComponent(
-    private val identifier: String,
     private val uiModels: List<WeekUiModel>,
     override val vmDelegate: WeekVMDelegate
 ) : UXComponent<WeekVMDelegate, WeekUIDelegate> {
 
     override fun render(uiDelegate: WeekUIDelegate): List<EpoxyModel<*>> {
-        val models = uiModels
+        return uiModels
             .map { WeekUXComponent(it.week, it, vmDelegate).render(uiDelegate) }
             .reduce { acc, list -> acc + list }
-
-        return CarouselModel_()
-            .id(identifier)
-            .models(models)
-            .toList()
     }
 
 }
