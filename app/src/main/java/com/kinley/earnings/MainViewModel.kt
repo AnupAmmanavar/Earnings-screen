@@ -38,8 +38,8 @@ class MainViewModel : ViewModel(), LifecycleObserver {
          * The change in the any of the dependent values(list of weeks and selected week) will trigger a change in UIState
          */
         with(appState) {
-            weeklyReports
-                .combine(selectedWeeklyReport) { weeklyReports: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
+
+                combine(weeklyReports, selectedWeeklyReport) { weeklyReports: List<WeeklyReport>, selectedWeeklyReport: WeeklyReport? ->
                     uiMapper.toWeeksUiModels(weeklyReports, selectedWeeklyReport)
                 }
                 .onEach { uiState.weeksUiModel.value = it }
@@ -56,12 +56,11 @@ class MainViewModel : ViewModel(), LifecycleObserver {
 
         with(appState) {
 
-            selectedWeeklyReport
-                .combine(selectedDailyReport) { selectedWeeklyReport: WeeklyReport?, selectedDailyReport: DailyReport? ->
-                    uiMapper.toWeekdayUiModels(selectedWeeklyReport, selectedDailyReport)
-                }
-                .onEach { uiState.weekdaysUiModel.value = it }
-                .launchIn(viewModelScope)
+            combine(selectedWeeklyReport, selectedDailyReport) { selectedWeeklyReport: WeeklyReport?, selectedDailyReport: DailyReport? ->
+                uiMapper.toWeekdayUiModels(selectedWeeklyReport, selectedDailyReport)
+            }
+             .onEach { uiState.weekdaysUiModel.value = it }
+             .launchIn(viewModelScope)
         }
     }
 
@@ -91,10 +90,10 @@ class MainViewModel : ViewModel(), LifecycleObserver {
         with(appState) {
 
             selectedWeeklyReport
-                .onEach { weeklyReport ->
-                    // By default the first day of the week is selected
-                    selectedDailyReport.value = weeklyReport?.dailyReports?.getOrNull(0)
+                .map { weeklyReport ->
+                    weeklyReport?.dailyReports?.getOrNull(0)  // By default the first day of the week is selected
                 }
+                .onEach { selectedDailyReport.value = it }
                 .launchIn(viewModelScope)
         }
 
