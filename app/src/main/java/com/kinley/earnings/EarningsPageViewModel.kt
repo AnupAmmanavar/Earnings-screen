@@ -7,7 +7,7 @@ import com.kinley.earnings.entities.DailyReport
 import com.kinley.earnings.entities.WeeklyReport
 import kotlinx.coroutines.flow.*
 
-class MainViewModel : ViewModel(), LifecycleObserver {
+class EarningsPageViewModel : ViewModel(), LifecycleObserver {
 
     private val repository = Repository()
     private val uiMapper = UiMapper()

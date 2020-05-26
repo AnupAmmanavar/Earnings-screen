@@ -18,11 +18,10 @@ import com.kinley.ui.weekdaycomponent.WeekdayUiModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
+class EarningsPage : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
 
-    private val vm: MainViewModel by viewModels()
+    private val vm: EarningsPageViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,10 +30,10 @@ class MainActivity : AppCompatActivity(), WeekUIDelegate, WeekdayUIDelegate {
         lifecycle.addObserver(vm)
 
         // Defining the view of weeks
-        rv_weeks.withModels { createWeekModels(this@MainActivity).render(this) }
+        rv_weeks.withModels { createWeekModels(this@EarningsPage).render(this) }
 
         // Defining the view of weekdays
-        rv_weekdays.withModels { createWeekdaysModels(this@MainActivity).render(this) }
+        rv_weekdays.withModels { createWeekdaysModels(this@EarningsPage).render(this) }
 
         // Defining the views of earnings
         rv_earnings.withModels { createEarningsModels().render(this) }
